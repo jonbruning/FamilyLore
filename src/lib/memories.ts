@@ -31,5 +31,14 @@ export async function createMemoryFromRecording(blob: Blob, userId: string) {
     .single()
   if (insertError) throw insertError
 
+  triggerEnrichment(data.id)
+
   return data
+}
+
+function triggerEnrichment(memoryId: string) {
+  fetch('/.netlify/functions/enrich', {
+    method: 'POST',
+    body: JSON.stringify({ memoryId }),
+  }).catch((err) => console.error('Failed to trigger enrichment:', err))
 }

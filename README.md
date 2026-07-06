@@ -13,7 +13,10 @@ A private, voice-first family memory archive. See `FAMILY_LORE_SPEC.md` for the 
    and the `audio`/`photos` Storage buckets, with RLS policies.
 5. Copy `.env.example` to `.env.local` and fill in your project's URL and anon key
    (Project Settings → API).
-6. Install dependencies and run the dev server:
+6. For the enrichment pipeline (Netlify Functions), also fill in `SUPABASE_URL`
+   (same project URL), `SUPABASE_SERVICE_ROLE_KEY` (Project Settings → API —
+   keep secret, server-side only), `OPENAI_API_KEY`, and `ANTHROPIC_API_KEY`.
+7. Install dependencies and run the dev server:
 
    ```bash
    npm install
@@ -23,4 +26,6 @@ A private, voice-first family memory archive. See `FAMILY_LORE_SPEC.md` for the 
 ## Deploy
 
 Connected to Netlify via `netlify.toml` (build: `npm run build`, publish: `dist`).
-Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as Netlify environment variables.
+Set these as Netlify environment variables: `VITE_SUPABASE_URL`,
+`VITE_SUPABASE_ANON_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`.
