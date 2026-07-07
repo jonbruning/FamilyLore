@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Memory } from '../lib/memories'
-import { attachPhoto, getSignedUrl, updateMemory } from '../lib/memories'
+import { attachPhoto, deleteMemory, getSignedUrl, updateMemory } from '../lib/memories'
 
-export function TimelineCard({ memory }: { memory: Memory }) {
+export function TimelineCard({ memory, onTagClick }: { memory: Memory; onTagClick: (tag: string) => void }) {
   const [expanded, setExpanded] = useState(false)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const [summary, setSummary] = useState(memory.summary ?? '')
   const [tags, setTags] = useState(memory.tags ?? [])
@@ -52,19 +53,42 @@ export function TimelineCard({ memory }: { memory: Memory }) {
     setPhotoUrl(await getSignedUrl('photos', path))
   }
 
+  async function handleDelete() {
+    if (!confirm('Delete this memory? This cannot be undone.')) return
+    setDeleting(true)
+    try {
+      await deleteMemory(memory)
+    } catch (err) {
+      console.error('Failed to delete memory:', err)
+      setDeleting(false)
+    }
+  }
+
   return (
-    <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
+    <div
+      className={`rounded-lg border border-neutral-200 p-4 dark:border-neutral-800 ${deleting ? 'opacity-50' : ''}`}
+    >
       <div className="mb-2 flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
         <span>{memory.occurred_at}</span>
-        {memory.status !== 'ready' && (
-          <span className={memory.status === 'failed' ? 'text-red-600 dark:text-red-400' : ''}>
-            {memory.status}
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {memory.status !== 'ready' && (
+            <span className={memory.status === 'failed' ? 'text-red-600 dark:text-red-400' : ''}>
+              {memory.status}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleting}
+            className="text-neutral-400 hover:text-red-600 dark:text-neutral-500 dark:hover:text-red-400"
+          >
+            Delete
+          </button>
+        </div>
       </div>
 
       {photoUrl && (
-        <img src={photoUrl} alt="" className="mb-3 max-h-48 w-full rounded-md object-cover" />
+        <img src={photoUrl} alt="" className="mb-3 max-h-[28rem] w-full rounded-md object-contain" />
       )}
 
       <textarea
@@ -81,7 +105,9 @@ export function TimelineCard({ memory }: { memory: Memory }) {
             key={tag}
             className="flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-xs text-violet-800 dark:bg-violet-900/40 dark:text-violet-200"
           >
-            {tag}
+            <button type="button" onClick={() => onTagClick(tag)} className="hover:underline">
+              {tag}
+            </button>
             <button type="button" onClick={() => removeTag(tag)} className="text-violet-500 hover:text-violet-900">
               ×
             </button>

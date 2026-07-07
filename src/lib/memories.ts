@@ -89,6 +89,14 @@ export async function getSignedUrl(bucket: 'audio' | 'photos', path: string): Pr
   return data.signedUrl
 }
 
+export async function deleteMemory(memory: Memory) {
+  if (memory.audio_path) await supabase.storage.from('audio').remove([memory.audio_path])
+  if (memory.photo_path) await supabase.storage.from('photos').remove([memory.photo_path])
+
+  const { error } = await supabase.from('memories').delete().eq('id', memory.id)
+  if (error) throw error
+}
+
 export async function attachPhoto(memory: Memory, file: File) {
   const extension = file.name.includes('.') ? file.name.split('.').pop() : 'jpg'
   const path = `${memory.created_by}/${crypto.randomUUID()}.${extension}`
