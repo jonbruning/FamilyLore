@@ -67,7 +67,7 @@ export function CaptureButton({ userId }: { userId: string }) {
           : 'Hold to talk'
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-white px-4 dark:bg-neutral-900">
+    <div className="flex flex-1 flex-col items-center justify-center gap-6 bg-white px-4 dark:bg-neutral-900">
       <button
         type="button"
         disabled={status === 'uploading'}
