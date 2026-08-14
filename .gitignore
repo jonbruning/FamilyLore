@@ -26,6 +26,9 @@ dist-ssr
 # Local Netlify folder
 .netlify
 
+# Written by `netlify dev` when it boots the edge-functions runtime
+deno.lock
+
 # Downloaded archive — family recordings and photos. This repo is public;
 # these must never be committed.
 backups
