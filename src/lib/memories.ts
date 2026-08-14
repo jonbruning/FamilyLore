@@ -109,5 +109,9 @@ export async function attachPhoto(memory: Memory, file: File) {
   const { error: updateError } = await supabase.from('memories').update({ photo_path: path }).eq('id', memory.id)
   if (updateError) throw updateError
 
+  // Only once the row safely points at the new file — otherwise a failed update
+  // would leave the memory pointing at a photo we had already deleted.
+  if (memory.photo_path) await supabase.storage.from('photos').remove([memory.photo_path])
+
   return path
 }
