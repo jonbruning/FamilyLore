@@ -128,12 +128,14 @@ export function TimelineCard({ memory, onTagClick }: { memory: Memory; onTagClic
       {photos.length > 0 && (
         <div className={`mb-3 grid gap-2 ${photos.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {photos.map(({ path, url }) => (
-            <div key={path} className="relative">
+            // w-fit so the element shrink-wraps the picture — with a full-width
+            // object-contain image the remove button lands in the letterboxing.
+            <div key={path} className="relative mx-auto w-fit">
               {url && (
                 <img
                   src={url}
                   alt=""
-                  className={`w-full rounded-md object-contain ${photos.length > 1 ? 'max-h-64' : 'max-h-[28rem]'}`}
+                  className={`max-w-full rounded-md object-contain ${photos.length > 1 ? 'max-h-64' : 'max-h-[28rem]'}`}
                 />
               )}
               <button
