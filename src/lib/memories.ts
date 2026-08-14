@@ -6,7 +6,7 @@ export type Memory = {
   created_at: string
   occurred_at: string
   audio_path: string | null
-  photo_path: string | null
+  photo_paths: string[]
   transcript: string | null
   summary: string | null
   tags: string[] | null
@@ -91,7 +91,7 @@ export async function getSignedUrl(bucket: 'audio' | 'photos', path: string): Pr
 
 export async function deleteMemory(memory: Memory) {
   if (memory.audio_path) await supabase.storage.from('audio').remove([memory.audio_path])
-  if (memory.photo_path) await supabase.storage.from('photos').remove([memory.photo_path])
+  if (memory.photo_paths.length) await supabase.storage.from('photos').remove(memory.photo_paths)
 
   const { error } = await supabase.from('memories').delete().eq('id', memory.id)
   if (error) throw error
@@ -106,12 +106,32 @@ export async function attachPhoto(memory: Memory, file: File) {
   })
   if (uploadError) throw uploadError
 
-  const { error: updateError } = await supabase.from('memories').update({ photo_path: path }).eq('id', memory.id)
+  // Re-read the list rather than appending to the copy this component was
+  // rendered with, so attaching several photos in a row can't drop earlier ones.
+  const { data: current, error: readError } = await supabase
+    .from('memories')
+    .select('photo_paths')
+    .eq('id', memory.id)
+    .single()
+  if (readError) throw readError
+
+  const { error: updateError } = await supabase
+    .from('memories')
+    .update({ photo_paths: [...current.photo_paths, path] })
+    .eq('id', memory.id)
   if (updateError) throw updateError
 
-  // Only once the row safely points at the new file — otherwise a failed update
-  // would leave the memory pointing at a photo we had already deleted.
-  if (memory.photo_path) await supabase.storage.from('photos').remove([memory.photo_path])
-
   return path
+}
+
+export async function removePhoto(memory: Memory, path: string) {
+  const { error } = await supabase
+    .from('memories')
+    .update({ photo_paths: memory.photo_paths.filter((p) => p !== path) })
+    .eq('id', memory.id)
+  if (error) throw error
+
+  // Only once the row no longer references it, so a failed update can't strand
+  // a memory pointing at a deleted file.
+  await supabase.storage.from('photos').remove([path])
 }

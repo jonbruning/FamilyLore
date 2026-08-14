@@ -135,7 +135,10 @@ function renderArchive(memories) {
     if (m.people?.length) lines.push(`**People:** ${m.people.join(', ')}`)
     if (m.tags?.length) lines.push(`**Tags:** ${m.tags.join(', ')}`)
     if (m.audio_path) lines.push(`**Recording:** [audio/${m.audio_path}](audio/${m.audio_path})`)
-    if (m.photo_path) lines.push(`**Photo:** [photos/${m.photo_path}](photos/${m.photo_path})`)
+    for (const [i, photo] of (m.photo_paths ?? []).entries()) {
+      const label = (m.photo_paths ?? []).length > 1 ? `Photo ${i + 1}` : 'Photo'
+      lines.push(`**${label}:** [photos/${photo}](photos/${photo})`)
+    }
     if (m.status !== 'ready') lines.push(`**Status:** ${m.status}`)
     lines.push('')
     if (m.transcript) lines.push('> ' + m.transcript.replace(/\n+/g, '\n> '), '')
@@ -172,7 +175,7 @@ const storedPhotos = new Set(await listBucket('photos'))
 const orphanRows = memories.filter(
   (m) =>
     (m.audio_path && !storedAudio.has(m.audio_path)) ||
-    (m.photo_path && !storedPhotos.has(m.photo_path)),
+    (m.photo_paths ?? []).some((p) => !storedPhotos.has(p)),
 )
 
 if (orphanRows.length) {
