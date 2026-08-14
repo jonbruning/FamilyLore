@@ -25,3 +25,7 @@ dist-ssr
 
 # Local Netlify folder
 .netlify
+
+# Downloaded archive — family recordings and photos. This repo is public;
+# these must never be committed.
+backups
