@@ -57,7 +57,7 @@ memories (
   created_at timestamptz default now(),
   occurred_at date,              -- when the memory happened (editable, defaults to today)
   audio_path text,               -- storage path
-  photo_path text,
+  photo_paths text[],            -- any number of photos (migration 0004)
   transcript text,
   summary text,
   tags text[],
